@@ -5,7 +5,7 @@
 #include <cmath>
 #include <cassert>
 #include <imgui.h>
-#include "Matrixfunction.h"
+#include "Mathfunction.h"
 
 // 4x4行列表示
 static const int kRowHeight = 20;
@@ -25,6 +25,49 @@ void VectorScreenPrintf(int x, int y, const Vector3& vector, const char* label) 
 	Novice::ScreenPrintf(x + kColumnWidth, y, "%.02f", vector.y);
 	Novice::ScreenPrintf(x + kColumnWidth * 2, y, "%.02f", vector.z);
 	Novice::ScreenPrintf(x + kColumnWidth * 3, y, "%s", label);
+}
+
+// Grid
+void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix) {
+
+	const float kGridHalfWidth = 2.0f;                                      // Grid半分
+	const uint32_t kSubdivision = 10;                                       // 分割数
+	const float kGridEvery = (kGridHalfWidth * 2.0f) / float(kSubdivision); // 1つ分の長さ
+
+	// 奥から手前への線を順番に引いていく
+	for (uint32_t xIndex = 0; xIndex <= kSubdivision; ++xIndex) {
+		// 始点と終点
+		float st = -kGridHalfWidth + (kGridEvery * xIndex);
+		Vector3 xSp, xEp;
+		xSp = {st, 0.0f, -kGridHalfWidth}; // 始点
+		xEp = {st, 0.0f, kGridHalfWidth};  // 終点
+		// ndcまで変換
+		Vector3 ndcXsp = Transform(xSp, viewProjectionMatrix);
+		Vector3 ndcXep = Transform(xEp, viewProjectionMatrix);
+		// screenまで変換
+		Vector3 screenXsp = Transform(ndcXsp, viewportMatrix);
+		Vector3 screenXep = Transform(ndcXep, viewportMatrix);
+		// 線を引く
+		Novice::DrawLine(
+		    (int)screenXsp.x, (int)screenXsp.y, (int)screenXep.x, (int)screenXep.y, WHITE);
+	}
+	// 左から右に順番に引く
+	for (uint32_t zIndex = 0; zIndex <= kSubdivision; ++zIndex) {
+		// 始点と終点
+		float st2 = -kGridHalfWidth + (kGridEvery * zIndex);
+		Vector3 zSp, zEp;
+		zSp = {-kGridHalfWidth, 0.0f, st2}; // 始点
+		zEp = {kGridHalfWidth, 0.0f, st2};  // 終点
+		// ndcまで変換
+		Vector3 ndcZsp = Transform(zSp, viewProjectionMatrix);
+		Vector3 ndcZep = Transform(zEp, viewProjectionMatrix);
+		// screenまで変換
+		Vector3 screenZsp = Transform(ndcZsp, viewportMatrix);
+		Vector3 screenZep = Transform(ndcZep, viewportMatrix);
+		// 線を引く
+		Novice::DrawLine(
+		    (int)screenZsp.x, (int)screenZsp.y, (int)screenZep.x, (int)screenZep.y, WHITE);
+	}
 }
 
 const char kWindowTitle[] = "LE2D_18_ニヘイリュウダイ_MT3";
