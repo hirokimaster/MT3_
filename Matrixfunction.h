@@ -1,48 +1,40 @@
-#pragma once
+ï»¿#pragma once
+#include "Vector3.h"
+#include "Matrix4x4.h"
 
-typedef struct Vector3 {
-	float x;
-	float y;
-	float z;
-};
-
-typedef struct Matrix4x4 {
-	float m[4][4];
-};
-
-// Ï
+// ç©
 Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2);
-// Šg‘åk¬s—ñ
+// æ‹¡å¤§ç¸®å°è¡Œåˆ—
 Matrix4x4 MakeScaleMatrix(const Vector3& scale);
-// •½sˆÚ“®
+// å¹³è¡Œç§»å‹•
 Matrix4x4 MakeTranslateMatrix(const Vector3& translate);
 
-// ƒrƒ…[ƒ|[ƒg•ÏŠ·s—ñ
+// ãƒ“ãƒ¥ãƒ¼ãƒãƒ¼ãƒˆå¤‰æ›è¡Œåˆ—
 Matrix4x4 MakeViewportMatrix(float left, float top, float width, float heght, float minDepth, float maxDepth);
 
 
 /*---------------------------------
- ‰ñ“]s—ñ
+ å›è»¢è¡Œåˆ—
 ------------------------------------*/
 
-// X²
+// Xè»¸
 Matrix4x4 MakeRotateXMatrix(float radian);
-// Y²
+// Yè»¸
 Matrix4x4 MakeRotateYMatrix(float radian);
-// Z²
+// Zè»¸
 Matrix4x4 MakeRotateZMatrix(float radian);
 
-// ƒAƒtƒBƒ“•ÏŠ·
+// ã‚¢ãƒ•ã‚£ãƒ³å¤‰æ›
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rot, const Vector3& translate);
 
-// “§‹“Š‰es—ñ
+// é€è¦–æŠ•å½±è¡Œåˆ—
 Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip);
 
-//³Ë‰es—ñ
+//æ­£å°„å½±è¡Œåˆ—
 Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip);
 
-// ‹ts—ñ
+// é€†è¡Œåˆ—
 Matrix4x4 Inverse(const Matrix4x4& m);
 
-// ’PˆÊs—ñ
+// å˜ä½è¡Œåˆ—
 Matrix4x4 MakeIdentityMatrix();
