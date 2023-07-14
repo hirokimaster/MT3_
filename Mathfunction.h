@@ -46,3 +46,12 @@ Matrix4x4 Inverse(const Matrix4x4& m);
 
 // 単位行列
 Matrix4x4 MakeIdentityMatrix();
+
+// 変換
+Vector3 Transform(const Vector3& vector, const Matrix4x4& matrix);
+
+// ノルム
+float Length(const Vector3& v);
+
+// ベクトル減算
+Vector3 Subtract(const Vector3& v1, const Vector3& v2);

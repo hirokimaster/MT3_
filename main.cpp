@@ -7,6 +7,11 @@
 #include <imgui.h>
 #include "Mathfunction.h"
 
+struct Sphere {
+	Vector3 center;
+	float radius;
+};
+
 // 4x4行列表示
 static const int kRowHeight = 20;
 static const int kColumnWidth = 60;
@@ -67,6 +72,57 @@ void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMa
 		// 線を引く
 		Novice::DrawLine(
 		    (int)screenZsp.x, (int)screenZsp.y, (int)screenZep.x, (int)screenZep.y, WHITE);
+	}
+}
+
+// Sphere
+void DrawSphere(
+    const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix,
+    uint32_t color) {
+	const uint32_t kSubdivision = 16;
+	const float pi = (float)M_PI;
+	const float kLonEvery = pi * 2.0f / float(kSubdivision);
+	const float kLatEvery = pi / float(kSubdivision);
+
+	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
+		// 緯度の方向に分割
+		float lat = -pi / 2.0f + kLatEvery * latIndex;
+
+		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
+			// 経度の方向に分割
+			float lon = lonIndex * kLonEvery;
+			// world座標
+			Vector3 a, b, c;
+			// 緯度、経度
+			float latD = pi / kSubdivision;
+			float lonD = (2.0f * pi) / kSubdivision;
+
+			a = {
+			    sphere.center.x + sphere.radius * (std::cos(lat) * std::cos(lon)),
+			    sphere.center.y + sphere.radius * std::sin(lat),
+			    sphere.center.z + sphere.radius * (std::cos(lat) * std::sin(lon))};
+
+			b = {
+			    sphere.center.x + sphere.radius * (std::cos(lat + latD) * std::cos(lon)),
+			    sphere.center.y + sphere.radius * std::sin(lat + latD),
+			    sphere.center.z + sphere.radius * (std::cos(lat + latD) * std::sin(lon))};
+
+			c = {
+			    sphere.center.x + sphere.radius * (std::cos(lat) * std::cos(lon + lonD)),
+			    sphere.center.y + sphere.radius * std::sin(lat),
+			    sphere.center.z + sphere.radius * (std::cos(lat) * std::sin(lon + lonD))};
+
+			// a,b,cをscreen座標に変換
+			Vector3 ndcVertexA = Transform(a, viewProjectionMatrix);
+			Vector3 ndcVertexB = Transform(b, viewProjectionMatrix);
+			Vector3 ndcVertexC = Transform(c, viewProjectionMatrix);
+			Vector3 screenA = Transform(ndcVertexA, viewportMatrix);
+			Vector3 screenB = Transform(ndcVertexB, viewportMatrix);
+			Vector3 screenC = Transform(ndcVertexC, viewportMatrix);
+			// ab acで線を引く
+			Novice::DrawLine((int)screenA.x, (int)screenA.y, (int)screenB.x, (int)screenB.y, color);
+			Novice::DrawLine((int)screenA.x, (int)screenA.y, (int)screenC.x, (int)screenC.y, color);
+		}
 	}
 }
 
