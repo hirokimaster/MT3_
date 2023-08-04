@@ -1,8 +1,8 @@
-#include "Mathfunction.h"
+ï»¿#include "Mathfunction.h"
 #include <cmath>
 #include <cassert>
 
-// s—ñ‚ÌÏ
+// è¡Œåˆ—ã®ç©
 Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2) {
 	Matrix4x4 result;
 	result.m[0][0] = (m1.m[0][0] * m2.m[0][0]) + (m1.m[0][1] * m2.m[1][0]) +
@@ -42,7 +42,7 @@ Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2) {
 	return result;
 }
 
-// Šg‘åk¬s—ñ
+// æ‹¡å¤§ç¸®å°è¡Œåˆ—
 Matrix4x4 MakeScaleMatrix(const Vector3& scale) {
 	Matrix4x4 result;
 
@@ -66,7 +66,7 @@ Matrix4x4 MakeScaleMatrix(const Vector3& scale) {
 	return result;
 }
 
-// •½sˆÚ“®
+// å¹³è¡Œç§»å‹•
 Matrix4x4 MakeTranslateMatrix(const Vector3& translate) {
 	Matrix4x4 result;
 
@@ -91,10 +91,10 @@ Matrix4x4 MakeTranslateMatrix(const Vector3& translate) {
 }
 
 /*---------------------------------
- ‰ñ“]s—ñ
+ å›è»¢è¡Œåˆ—
 ------------------------------------*/
 
-// X²
+// Xè»¸
 Matrix4x4 MakeRotateXMatrix(float radian) {
 	Matrix4x4 result;
 	float cos = std::cos(radian);
@@ -120,7 +120,7 @@ Matrix4x4 MakeRotateXMatrix(float radian) {
 	return result;
 }
 
-// Y²
+// Yè»¸
 Matrix4x4 MakeRotateYMatrix(float radian) {
 	Matrix4x4 result;
 	float cos = std::cos(radian);
@@ -146,7 +146,7 @@ Matrix4x4 MakeRotateYMatrix(float radian) {
 	return result;
 }
 
-// Z²
+// Zè»¸
 Matrix4x4 MakeRotateZMatrix(float radian) {
 	Matrix4x4 result;
 	float cos = std::cos(radian);
@@ -172,7 +172,7 @@ Matrix4x4 MakeRotateZMatrix(float radian) {
 	return result;
 }
 
-// ƒrƒ…[ƒ|[ƒg•ÏŠ·s—ñ
+// ãƒ“ãƒ¥ãƒ¼ãƒãƒ¼ãƒˆå¤‰æ›è¡Œåˆ—
 Matrix4x4 MakeViewportMatrix(float left, float top, float width, float heght, float minDepth, float maxDepth) {
 	Matrix4x4 result;
 
@@ -197,30 +197,30 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float heght, fl
 
 }
 
-// ƒAƒtƒBƒ“•ÏŠ·
+// ã‚¢ãƒ•ã‚£ãƒ³å¤‰æ›
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rot, const Vector3& translate) {
 
-	// ƒXƒP[ƒŠƒ“ƒOs—ñ
+	// ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°è¡Œåˆ—
 	Matrix4x4 Scale = MakeScaleMatrix(scale);
 
-	// ‰ñ“]s—ñ
+	// å›è»¢è¡Œåˆ—
 	Matrix4x4 RotateX = MakeRotateXMatrix(rot.x);
 	Matrix4x4 RotateY = MakeRotateYMatrix(rot.y);
 	Matrix4x4 RotateZ = MakeRotateZMatrix(rot.z);
 
-	// ‰ñ“]s—ñ‡¬
+	// å›è»¢è¡Œåˆ—åˆæˆ
 	Matrix4x4 Rotate = Multiply(Multiply(RotateX, RotateY), RotateZ);
 
-	// •½sˆÚ“®s—ñ
+	// å¹³è¡Œç§»å‹•è¡Œåˆ—
 	Matrix4x4 Translate = MakeTranslateMatrix(translate);
 
-	// ƒXƒP[ƒ‹A‰ñ“]A•½sˆÚ“®‚Ì‡¬
+	// ã‚¹ã‚±ãƒ¼ãƒ«ã€å›è»¢ã€å¹³è¡Œç§»å‹•ã®åˆæˆ
 	Matrix4x4 Transform = Multiply(Multiply(Scale, Rotate), Translate);
 
 	return Transform;
 }
 
-// “§‹“Š‰es—ñ
+// é€è¦–æŠ•å½±è¡Œåˆ—
 Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip) {
 	Matrix4x4 result;
 	float cot = 1.0f / std::tan(fovY / 2.0f);
@@ -245,7 +245,7 @@ Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip
 	return result;
 }
 
-// ³Ë‰es—ñ
+// æ­£å°„å½±è¡Œåˆ—
 Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip) {
 	Matrix4x4 result;
 
@@ -269,11 +269,11 @@ Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float botto
 	return result;
 }
 
-// ‹ts—ñ
+// é€†è¡Œåˆ—
 Matrix4x4 Inverse(const Matrix4x4& m) {
 	Matrix4x4 result;
 
-	// 4x4‚Ìs—ñ®‚ğ‹‚ß‚é
+	// 4x4ã®è¡Œåˆ—å¼ã‚’æ±‚ã‚ã‚‹
 	float determinant = (m.m[0][0] * m.m[1][1] * m.m[2][2] * m.m[3][3]) + (m.m[0][0] * m.m[1][2] * m.m[2][3] * m.m[3][1]) + (m.m[0][0] * m.m[1][3] * m.m[2][1] * m.m[3][2])
 		- (m.m[0][0] * m.m[1][3] * m.m[2][2] * m.m[3][1]) - (m.m[0][0] * m.m[1][2] * m.m[2][1] * m.m[3][3]) - (m.m[0][0] * m.m[1][1] * m.m[2][3] * m.m[3][2])
 		- (m.m[0][1] * m.m[1][0] * m.m[2][2] * m.m[3][3]) - (m.m[0][2] * m.m[1][0] * m.m[2][3] * m.m[3][1]) - (m.m[0][3] * m.m[1][0] * m.m[2][1] * m.m[3][2])
@@ -283,9 +283,9 @@ Matrix4x4 Inverse(const Matrix4x4& m) {
 		- (m.m[0][1] * m.m[1][2] * m.m[2][3] * m.m[3][0]) - (m.m[0][2] * m.m[1][3] * m.m[2][1] * m.m[3][0]) - (m.m[0][3] * m.m[1][1] * m.m[2][2] * m.m[3][0])
 		+ (m.m[0][3] * m.m[1][2] * m.m[2][1] * m.m[3][0]) + (m.m[0][2] * m.m[1][1] * m.m[2][3] * m.m[3][0]) + (m.m[0][1] * m.m[1][3] * m.m[2][2] * m.m[3][0]);
 
-	float a = 1.0f / determinant; // 1€s—ñ®(1/|A|)
+	float a = 1.0f / determinant; // 1Ã·è¡Œåˆ—å¼(1/|A|)
 
-	// ‹ts—ñ‚ğ‹‚ß‚é
+	// é€†è¡Œåˆ—ã‚’æ±‚ã‚ã‚‹
 	result.m[0][0] = a * ((m.m[1][1] * m.m[2][2] * m.m[3][3]) + (m.m[1][2] * m.m[2][3] * m.m[3][1]) + (m.m[1][3] * m.m[2][1] * m.m[3][2])
 		- (m.m[1][3] * m.m[2][2] * m.m[3][1]) - (m.m[1][2] * m.m[2][1] * m.m[3][3]) - (m.m[1][1] * m.m[2][3] * m.m[3][2]));
 
@@ -338,7 +338,7 @@ Matrix4x4 Inverse(const Matrix4x4& m) {
 
 }
 
-// ’PˆÊs—ñ
+// å˜ä½è¡Œåˆ—
 Matrix4x4 MakeIdentityMatrix() {
 	static const Matrix4x4 result{ 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
@@ -346,7 +346,7 @@ Matrix4x4 MakeIdentityMatrix() {
 	return result;
 }
 
-// •ÏŠ·
+// å¤‰æ›
 Vector3 Transform(const Vector3& vector, const Matrix4x4& matrix) {
 	Vector3 result;
 	result.x = vector.x * matrix.m[0][0] + vector.y * matrix.m[1][0] + vector.z * matrix.m[2][0] +
@@ -365,18 +365,62 @@ Vector3 Transform(const Vector3& vector, const Matrix4x4& matrix) {
 	return result;
 }
 
-// ’·‚³iƒmƒ‹ƒ€j
+// é•·ã•ï¼ˆãƒãƒ«ãƒ ï¼‰
 float Length(const Vector3& v) {
 	float result;
 	result = sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
 	return result;
 }
 
-// Œ¸Z
-Vector3 Subtract(const Vector3& v1, const Vector3& v2) {
+// åŠ ç®—
+Vector3 Vec3Add(const Vector3& v1, const Vector3& v2) {
+	Vector3 result;
+	result.x = v1.x + v2.x;
+	result.y = v1.y + v2.y;
+	result.z = v1.z + v2.z;
+	return result;
+}
+
+// æ¸›ç®—
+Vector3 Vec3Subtract(const Vector3& v1, const Vector3& v2) {
 	Vector3 result;
 	result.x = v1.x - v2.x;
 	result.y = v1.y - v2.y;
 	result.z = v1.z - v2.z;
+	return result;
+}
+
+// ã‚¹ã‚«ãƒ©ãƒ¼å€
+Vector3 Vec3Multiply(float scalar, const Vector3& v) {
+	Vector3 result;
+	result.x = scalar * v.x;
+	result.y = scalar * v.y;
+	result.z = scalar * v.z;
+	return result;
+}
+
+// æ­£è¦åŒ–
+Vector3 Normalize(const Vector3& v) {
+	Vector3 result;
+	float norm = sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
+	result.x = v.x / norm;
+	result.y = v.y / norm;
+	result.z = v.z / norm;
+	return result;
+}
+
+// ã‚¯ãƒ­ã‚¹ç©
+Vector3 Cross(const Vector3& v1, const Vector3& v2) {
+	Vector3 result;
+	result.x = v1.y * v2.z - v1.z * v2.y;
+	result.y = v1.z * v2.x - v1.x * v2.z;
+	result.z = v1.x * v2.y - v1.y * v2.x;
+	return result;
+}
+
+// å†…ç©
+float Dot(const Vector3& v1, const Vector3& v2) {
+	float result;
+	result = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 	return result;
 }
