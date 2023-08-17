@@ -16,6 +16,11 @@ struct Triangle {
 	Vector3 vertices[3]; // !< 頂点
 };
 
+// 線分
+struct Segment {
+	Vector3 origin; // !< 始点
+	Vector3 diff;   // !< 終点への差分ベクトル
+};
 
 // 4x4行列表示
 static const int kRowHeight = 20;
@@ -60,6 +65,12 @@ void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMa
 		// 線を引く
 		Novice::DrawLine(
 		    (int)screenXsp.x, (int)screenXsp.y, (int)screenXep.x, (int)screenXep.y, WHITE);
+
+		if (xIndex == 5) {
+			// 線を引く
+			Novice::DrawLine(
+			    (int)screenXsp.x, (int)screenXsp.y, (int)screenXep.x, (int)screenXep.y, BLACK);
+		}
 	}
 	// 左から右に順番に引く
 	for (uint32_t zIndex = 0; zIndex <= kSubdivision; ++zIndex) {
@@ -77,6 +88,11 @@ void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMa
 		// 線を引く
 		Novice::DrawLine(
 		    (int)screenZsp.x, (int)screenZsp.y, (int)screenZep.x, (int)screenZep.y, WHITE);
+		if (zIndex == 5) {
+			// 線を引く
+			Novice::DrawLine(
+			    (int)screenZsp.x, (int)screenZsp.y, (int)screenZep.x, (int)screenZep.y, BLACK);
+		}
 	}
 }
 
@@ -131,6 +147,30 @@ void DrawSphere(
 	}
 }
 
+// Project
+Vector3 Project(const Vector3& v1, const Vector3& v2) {
+	Vector3 project;
+	// 単位ベクトルを求める
+	Vector3 unit;
+	unit = Normalize(v2);
+
+	project.x = Dot(v1, Vec3Multiply(unit.x, unit));
+	project.y = Dot(v1, Vec3Multiply(unit.y, unit));
+	project.z = Dot(v1, Vec3Multiply(unit.z, unit));
+
+	return project;
+}
+
+// ClosestPoint
+Vector3 ClosestPoint(const Vector3& point, const Segment& segment) {
+	Vector3 closestPoint;
+	Vector3 project;
+	project = Project(Vec3Subtract(point, segment.origin), segment.diff);
+	closestPoint = Vec3Add(segment.origin, project);
+
+	return closestPoint;
+}
+
 void DrawTriangle(
 	const Triangle& triangle, const Matrix4x4& viewProjectionMatrix,
 	const Matrix4x4& viewportMatrix, uint32_t color) 
@@ -148,13 +188,55 @@ void DrawTriangle(
 	Novice::DrawTriangle(
 	    int(screenVertices[0].x), int(screenVertices[0].y), int(screenVertices[1].x),
 	    int(screenVertices[1].y), int(screenVertices[2].x), int(screenVertices[2].y), color,
-	    kFillModeSolid);
+	    kFillModeWireFrame);
+
+}
+
+bool IsCollision(const Triangle& triangle, const Segment& segment) {
+
+	// 法線
+	Vector3 v1 = Vec3Subtract(triangle.vertices[0], triangle.vertices[1]);
+	Vector3 v2 = Vec3Subtract(triangle.vertices[1], triangle.vertices[2]);
+	Vector3 v3 = Vec3Subtract(triangle.vertices[2], triangle.vertices[0]);
+	Vector3 normal = Normalize(Cross(v1, v2));
+	// 距離
+	float dist = Dot(triangle.vertices[1], normal);
+	
+
+	// 垂直の時
+	float bn = Dot(normal, segment.diff);
+	if (bn == 0.0f) {
+		return false;
+	}
+
+	float t = (dist - Dot(segment.origin, normal)) / bn; // 媒介変数tを求める
+	Vector3 p = Vec3Add(segment.origin, Vec3Multiply(t, segment.diff));
+	Vector3 v1p = Vec3Subtract(p, triangle.vertices[1]);
+	Vector3 v2p = Vec3Subtract(p, triangle.vertices[2]);
+	Vector3 v0p = Vec3Subtract(p, triangle.vertices[0]);
+	Vector3 cross01 = Cross(v1, v1p);
+	Vector3 cross12 = Cross(v2, v2p);
+	Vector3 cross20 = Cross(v3, v0p);
+
+	// 線分の長さ(範囲)
+	float norm = Length(Normalize(segment.diff));
+
+	if (t > 0.0f && t < norm) {
+		if (Dot(cross01, normal) >= 0.0f &&
+			Dot(cross12, normal) >= 0.0f &&
+		    Dot(cross20, normal) >= 0.0f) 
+		{
+			return true;
+		
+		}
+	}
+	return false;
 
 }
 
 
 
-const char kWindowTitle[] = "LE2D_18_ニヘイリュウダイ_MT3";
+const char kWindowTitle[] = "LE2D_18_ニヘイリュウダイ_MT3_02_04";
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -166,6 +248,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	char keys[256] = {0};
 	char preKeys[256] = {0};
 
+
+	Vector3 scale{1.0f, 1.0f, 1.0f};
+	Vector3 rotate{0.0f, 0.0f, 0.0f};
+	Vector3 translate{0.0f, 0.0f, 0.0f};
+	Vector3 cameraScale{1.0f, 1.0f, 1.0f};
+	Vector3 cameraRotate{0.3f, 0.0f, 0.0f};
+	Vector3 cameraTranslate{0.0f, 2.0f, -10.0f};
+
+	// 三角形の頂点
+	Triangle triangle;
+	triangle.vertices[0] = {-0.5f, -0.5f, 2.0f};
+	triangle.vertices[1] = {0.0f, 0.5f, 2.0f};
+	triangle.vertices[2] = {0.5f, -0.5f, 2.0f};
+		
+	
+	// 線分
+	Segment segment{
+	    {-2.0f, -1.0f, 0.0f},
+        {3.0f,  2.0f,  2.0f}
+    };
+	Vector3 point{-1.5f, 0.6f, 0.6f};
+
+	Vector3 project = Project(Vec3Subtract(point, segment.origin), segment.diff);
+	Vector3 closestPoint = ClosestPoint(point, segment);
+
+	uint32_t color = WHITE;
+
+
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -175,18 +285,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		memcpy(preKeys, keys, 256);
 		Novice::GetHitKeyStateAll(keys);
 
-		Vector3 scale{1.0f, 1.0f, 1.0f};
-		Vector3 rotate{0.0f, 0.0f, 0.0f};
-		Vector3 translate{0.0f, 0.0f, 0.0f};
-		Vector3 cameraScale{1.0f, 1.0f, 1.0f};
-		Vector3 cameraRotate{0.3f, 0.0f, 0.0f};
-		Vector3 cameraTranslate{0.0f, 2.0f, -10.0f};
-
-		uint32_t color = WHITE;
-
 		///
 		/// ↓更新処理ここから
 		///
+
+		// imgui
+		ImGui::Begin("setting");
+		ImGui::DragFloat3("CameraTranslate", &cameraTranslate.x, 0.01f);
+		ImGui::DragFloat3("CameraRotate", &cameraRotate.x, 0.01f);
+		ImGui::DragFloat3("Vertices[0]", &triangle.vertices[0].x, 0.01f);
+		ImGui::DragFloat3("Vertices[1]", &triangle.vertices[1].x, 0.01f);
+		ImGui::DragFloat3("Vertices[2]", &triangle.vertices[2].x, 0.01f);
+		ImGui::DragFloat3("Segment.orgin", &segment.origin.x, 0.01f);
+		ImGui::DragFloat3("Segment.diff", &segment.diff.x, 0.01f);
+		ImGui::End();
 
 		// 変換
 		Matrix4x4 worldMatrix = MakeAffineMatrix(scale, rotate, translate);
@@ -200,13 +312,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// ViewPortMatrix
 		Matrix4x4 viewportMatrix = MakeViewportMatrix(0, 0, 1200.0f, 720.0f, 0.0f, 1.0f);
 
-		// 三角形の頂点
-		Triangle triangle;
-		triangle.vertices[0] = {-0.05f, -0.05f, 0.0f};
-		triangle.vertices[1] = {0.0f, 0.05f, 0.0f};
-		triangle.vertices[2] = {0.05f, -0.05f, 0.0f};
-		
-
 		///
 		/// ↑更新処理ここまで
 		///
@@ -215,7 +320,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓描画処理ここから
 		///
 
+		DrawGrid(worldViewProjectionMatrix, viewportMatrix);
 
+		DrawTriangle(triangle, worldViewProjectionMatrix, viewportMatrix, WHITE);
+
+
+		if (IsCollision(triangle, segment)) {
+			color = RED;
+		}
+
+		// 線分
+		Vector3 start =
+		    Transform(Transform(segment.origin, worldViewProjectionMatrix), viewportMatrix);
+		Vector3 end = Transform(
+		    Transform(Vec3Add(segment.origin, segment.diff), worldViewProjectionMatrix),
+		    viewportMatrix);
+		Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), color);
 
 
 
