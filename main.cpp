@@ -12,6 +12,11 @@ struct Sphere {
 	float radius;
 };
 
+struct Triangle {
+	Vector3 vertices[3]; // !< 頂点
+};
+
+
 // 4x4行列表示
 static const int kRowHeight = 20;
 static const int kColumnWidth = 60;
@@ -126,6 +131,27 @@ void DrawSphere(
 	}
 }
 
+void DrawTriangle(
+	const Triangle& triangle, const Matrix4x4& viewProjectionMatrix,
+	const Matrix4x4& viewportMatrix, uint32_t color) 
+{
+
+	// Screen空間へと頂点を変換する
+	Vector3 screenVertices[3];
+
+	for (uint32_t i = 0; i < 3; ++i) {
+		Vector3 ndcVertex = Transform(triangle.vertices[i], viewProjectionMatrix);
+		screenVertices[i] = Transform(ndcVertex, viewportMatrix);
+	}
+
+	// 描画
+	Novice::DrawTriangle(
+	    int(screenVertices[0].x), int(screenVertices[0].y), int(screenVertices[1].x),
+	    int(screenVertices[1].y), int(screenVertices[2].x), int(screenVertices[2].y), color,
+	    kFillModeSolid);
+
+}
+
 
 
 const char kWindowTitle[] = "LE2D_18_ニヘイリュウダイ_MT3";
@@ -149,9 +175,37 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		memcpy(preKeys, keys, 256);
 		Novice::GetHitKeyStateAll(keys);
 
+		Vector3 scale{1.0f, 1.0f, 1.0f};
+		Vector3 rotate{0.0f, 0.0f, 0.0f};
+		Vector3 translate{0.0f, 0.0f, 0.0f};
+		Vector3 cameraScale{1.0f, 1.0f, 1.0f};
+		Vector3 cameraRotate{0.3f, 0.0f, 0.0f};
+		Vector3 cameraTranslate{0.0f, 2.0f, -10.0f};
+
+		uint32_t color = WHITE;
+
 		///
 		/// ↓更新処理ここから
 		///
+
+		// 変換
+		Matrix4x4 worldMatrix = MakeAffineMatrix(scale, rotate, translate);
+		Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraScale, cameraRotate, cameraTranslate);
+		Matrix4x4 viewMatrix = Inverse(cameraMatrix);
+		Matrix4x4 projectionMatrix =
+		    MakePerspectiveFovMatrix(0.45f, float(1280) / float(720), 0.1f, 100.0f);
+		// WVPMatrix
+		Matrix4x4 worldViewProjectionMatrix =
+		    Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
+		// ViewPortMatrix
+		Matrix4x4 viewportMatrix = MakeViewportMatrix(0, 0, 1200.0f, 720.0f, 0.0f, 1.0f);
+
+		// 三角形の頂点
+		Triangle triangle;
+		triangle.vertices[0] = {-0.05f, -0.05f, 0.0f};
+		triangle.vertices[1] = {0.0f, 0.05f, 0.0f};
+		triangle.vertices[2] = {0.05f, -0.05f, 0.0f};
+		
 
 		///
 		/// ↑更新処理ここまで
@@ -160,6 +214,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		/// ↓描画処理ここから
 		///
+
+
+
+
 
 		///
 		/// ↑描画処理ここまで
