@@ -159,25 +159,23 @@ Vector3 ClosestPoint(const Vector3& point, const Segment& segment) {
 }
 
 bool isCollision(const Segment& segment, const Plane& plane) {
-	// 単位ベクトルを求める
-	Vector3 unit;
-	unit = Normalize(plane.normal);
+
 
 	// 垂直の時
-	float bn = Dot(unit, segment.diff);
+	float bn = Dot(plane.normal, segment.diff);
 	if (bn == 0.0f) {
 		return false;
 	}
 
-	Vector3 center = Vec3Multiply(plane.distance, plane.normal); // 任意の点
-	float d = Dot(unit, center); 
+	//float d = Dot(unit, ); 
 
-	float t = (d - Dot(segment.origin, unit)) / bn; // 媒介変数tを求める
+	float t = (plane.distance - Dot(segment.origin, plane.normal)) / bn; // 媒介変数tを求める
 
-	if (t == 1.0f) {
+	if (t > 0.0f && t < 1.03f) {
 		return true;
-	} 
-	
+	}
+	return false;
+
 }
 
 const char kWindowTitle[] = "LE2D_18_ニヘイリュウダイ_MT3_02_03";
@@ -211,9 +209,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 法線
 	Vector3 normal = Normalize(Cross(v1, v2));
 
+	// 平面
 	Plane plane;
 	plane.normal = normal;
 	plane.distance = Dot(planePointA, plane.normal);
+
+	// 線分
+	Segment segment{
+	    {-2.0f, -1.0f, 0.0f},
+        {3.0f,  2.0f,  2.0f}
+    };
+	Vector3 point{-1.5f, 0.6f, 0.6f};
+
+	Vector3 project = Project(Vec3Subtract(point, segment.origin), segment.diff);
+	Vector3 closestPoint = ClosestPoint(point, segment);
 
 	uint32_t color = WHITE;
 
@@ -230,12 +239,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓更新処理ここから
 		///
 
+
 		// imgui
 		ImGui::Begin("setting");
 		ImGui::DragFloat3("CameraTranslate", &cameraTranslate.x, 0.01f);
 		ImGui::DragFloat3("CameraRotate", &cameraRotate.x, 0.01f);
 		ImGui::DragFloat3("Plane.normal", &plane.normal.x, 0.01f);
 		ImGui::DragFloat("Plane.distance", &plane.distance, 0.01f);
+		ImGui::DragFloat3("Segment.orgin", &segment.origin.x, 0.01f);
+		ImGui::DragFloat3("Segment.diff", &segment.diff.x, 0.01f);
 		ImGui::End();
 
 		// 変換
@@ -248,14 +260,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// ViewPortMatrix
 		Matrix4x4 viewportMatrix = MakeViewportMatrix(0, 0, 1200.0f, 720.0f, 0.0f, 1.0f);
 
-		Segment segment{
-		    {-2.0f, -1.0f, 0.0f},
-            {3.0f,  2.0f,  2.0f}
-        };
-		Vector3 point{-1.5f, 0.6f, 0.6f};
-
-		Vector3 project = Project(Vec3Subtract(point, segment.origin), segment.diff);
-		Vector3 closestPoint = ClosestPoint(point, segment);
+		
 
 
 		///
