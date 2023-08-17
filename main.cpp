@@ -104,7 +104,7 @@ void DrawSphere(
 
 			b = {
 			    sphere.center.x + sphere.radius * (std::cos(lat + latD) * std::cos(lon)),
-			    sphere.center.y + sphere.radius * std::sin(lat + latD),
+			    sphere.center.y + sphere.radius * std::sin(lat + latD),	
 			    sphere.center.z + sphere.radius * (std::cos(lat + latD) * std::sin(lon))};
 
 			c = {
@@ -125,6 +125,8 @@ void DrawSphere(
 		}
 	}
 }
+
+
 
 const char kWindowTitle[] = "LE2D_18_ニヘイリュウダイ_MT3";
 

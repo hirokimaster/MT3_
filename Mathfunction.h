@@ -1,57 +1,76 @@
-#pragma once
+ï»¿#pragma once
 
-typedef struct Vector3 {
+struct Vector3 {
 	float x;
 	float y;
 	float z;
 };
 
-typedef struct Matrix4x4 {
+struct Matrix4x4 {
 	float m[4][4];
 };
 
-// Ï
+// ç©
 Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2);
-// Šg‘åk¬s—ñ
+// æ‹¡å¤§ç¸®å°è¡Œåˆ—
 Matrix4x4 MakeScaleMatrix(const Vector3& scale);
-// •½sˆÚ“®
+// å¹³è¡Œç§»å‹•
 Matrix4x4 MakeTranslateMatrix(const Vector3& translate);
 
-// ƒrƒ…[ƒ|[ƒg•ÏŠ·s—ñ
-Matrix4x4 MakeViewportMatrix(float left, float top, float width, float heght, float minDepth, float maxDepth);
-
+// ãƒ“ãƒ¥ãƒ¼ãƒãƒ¼ãƒˆå¤‰æ›è¡Œåˆ—
+Matrix4x4 MakeViewportMatrix(
+    float left, float top, float width, float heght, float minDepth, float maxDepth);
 
 /*---------------------------------
- ‰ñ“]s—ñ
+ å›è»¢è¡Œåˆ—
 ------------------------------------*/
 
-// X²
+// Xè»¸
 Matrix4x4 MakeRotateXMatrix(float radian);
-// Y²
+// Yè»¸
 Matrix4x4 MakeRotateYMatrix(float radian);
-// Z²
+// Zè»¸
 Matrix4x4 MakeRotateZMatrix(float radian);
 
-// ƒAƒtƒBƒ“•ÏŠ·
+// ã‚¢ãƒ•ã‚£ãƒ³å¤‰æ›
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rot, const Vector3& translate);
 
-// “§‹“Š‰es—ñ
+// é€è¦–æŠ•å½±è¡Œåˆ—
 Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip);
 
-//³Ë‰es—ñ
-Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip);
+// æ­£å°„å½±è¡Œåˆ—
+Matrix4x4 MakeOrthographicMatrix(
+    float left, float top, float right, float bottom, float nearClip, float farClip);
 
-// ‹ts—ñ
+// é€†è¡Œåˆ—
 Matrix4x4 Inverse(const Matrix4x4& m);
 
-// ’PˆÊs—ñ
+// å˜ä½è¡Œåˆ—
 Matrix4x4 MakeIdentityMatrix();
 
-// •ÏŠ·
+// å¤‰æ›
 Vector3 Transform(const Vector3& vector, const Matrix4x4& matrix);
 
-// ƒmƒ‹ƒ€
+// ãƒãƒ«ãƒ 
 float Length(const Vector3& v);
 
-// ƒxƒNƒgƒ‹Œ¸Z
-Vector3 Subtract(const Vector3& v1, const Vector3& v2);
+// ãƒ™ã‚¯ãƒˆãƒ«æ¸›ç®—
+Vector3 Vec3Subtract(const Vector3& v1, const Vector3& v2);
+
+// ã‚¹ã‚«ãƒ©ãƒ¼å€
+Vector3 Vec3Multiply(float scalar, const Vector3& v);
+
+// æ­£è¦åŒ–
+Vector3 Normalize(const Vector3& v);
+
+// ã‚¯ãƒ­ã‚¹ç©
+Vector3 Cross(const Vector3& v1, const Vector3& v2);
+
+// åŠ ç®—
+Vector3 Vec3Add(const Vector3& v1, const Vector3& v2);
+
+// æ¸›ç®—
+Vector3 Vec3Subtract(const Vector3& v1, const Vector3& v2);
+
+// å†…ç©
+float Dot(const Vector3& v1, const Vector3& v2);
